@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>techmart-ejb</artifactId>
-    <packaging>ejb</packaging>
+    <packaging>jar</packaging>
     <name>TechMart-ejb</name>
 
     <properties>
@@ -44,4 +44,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
