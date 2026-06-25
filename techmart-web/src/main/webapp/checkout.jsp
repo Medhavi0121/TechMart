@@ -6,89 +6,98 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="lk.java.techmart.entity.Order" %>
+<%@ page import="lk.java.techmart.entity.Product" %>
+<%@ page import="java.util.Map" %>
 <html>
 <head>
-    <title>TechMart - Order Status</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-        .main-container {
-            background: #ffffff;
-            padding: 2rem;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-        h2 { color: #1a1a1a; font-size: 1.5rem; margin-bottom: 1.5rem; }
-        .data-card {
-            background: #f8fafc;
-            padding: 1.5rem;
-            border-radius: 12px;
-            text-align: left;
-            margin-bottom: 1.5rem;
-            border: 1px solid #e2e8f0;
-        }
-        .data-card p { margin: 0.5rem 0; font-size: 0.95rem; color: #475569; }
-        .status-pill {
-            padding: 4px 12px;
-            border-radius: 99px;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-        .btn-back {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background: #215be8;
-            color: #ffffff;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: background 0.3s ease;
-        }
-        .btn-back:hover { background: #334155; }
-    </style>
+    <title>TechMart - Checkout</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/style.css">
 </head>
 <body>
-
-<div class="main-container">
-    <h2>Order Status</h2>
+<div class="topbar"></div>
+<div class="page page-checkout">
+    <h2><span class="bracket">[</span>Your Cart &amp; Checkout<span class="bracket">]</span></h2>
 
     <%
-        Order processedOrder = (Order) request.getAttribute("order");
-        String customerName = (String) request.getAttribute("customer");
+        Map<Product, Integer> items = (Map<Product, Integer>) request.getAttribute("cartProducts");
 
-        if (processedOrder != null) {
+        if (items == null || items.isEmpty()) {
     %>
-    <div class="data-card">
-        <p>Customer: <strong><%= customerName %></strong></p>
-        <p>Order Status: <span class="status-pill" style="background: <%= "COMPLETED".equals(processedOrder.getStatus()) ? "#dcfce7" : "#fee2e2" %>; color: <%= "COMPLETED".equals(processedOrder.getStatus()) ? "#166534" : "#991b1b" %>;">
-            <%= processedOrder.getStatus() %>
-        </span></p>
-
-        <% if ("COMPLETED".equals(processedOrder.getStatus())) { %>
-        <p>Order ID: <strong><%= processedOrder.getId() %></strong></p>
-        <p style="color: #166534; font-size: 0.85rem; margin-top: 10px;">✔ Success! Background Async Notification triggered.</p>
-        <% } else { %>
-        <p style="color: #991b1b; font-size: 0.85rem; margin-top: 10px;">❌ Order Failed! Check Inventory Cache.</p>
-        <% } %>
+    <div class="empty-state">
+        <p>Your cart is empty.</p>
+        <a href="products">Go back to products &rarr;</a>
     </div>
-    <% } %>
+    <%
+    } else {
+    %>
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <%
+                double grandTotal = 0.0;
+                for (Map.Entry<Product, Integer> entry : items.entrySet()) {
+                    Product product = entry.getKey();
+                    Integer quantity = entry.getValue();
+                    double itemTotal = product.getPrice() * quantity;
+                    grandTotal += itemTotal;
+            %>
+            <tr>
+                <td class="name-cell"><%= product.getName() %>
+                </td>
+                <td class="num-cell">Rs. <%= product.getPrice() %>
+                </td>
+                <td class="num-cell"><%= quantity %>
+                </td>
+                <td class="num-cell">Rs. <%= itemTotal %>
+                </td>
+                <td>
+                    <form action="${pageContext.request.contextPath}/remove-from-cart" method="POST">
+                        <input type="hidden" name="productId" value="<%= product.getId() %>">
+                        <button type="submit" class="btn-remove">&times; Remove</button>
+                    </form>
+                </td>
+            </tr>
+            <%
+                }
+            %>
+            <tr class="grand-row">
+                <td colspan="3" class="grand-label">Grand Total</td>
+                <td class="num-cell">Rs. <%= grandTotal %>
+                </td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 
-    <a href="products" class="btn-back">Back to Products</a>
+    <div class="customer-block">
+        <h3>Customer Details</h3>
+        <form action="checkout" method="POST">
+            <div class="field-group">
+                <label for="customerName">Your Name</label>
+                <input type="text" id="customerName" name="customerName" required placeholder="Enter your name">
+            </div>
+            <button type="submit" class="btn-place">Place Order</button>
+        </form>
+    </div>
+    <%
+        }
+    %>
+
+    <a href="products" class="continue-link">&larr; Continue Shopping</a>
 </div>
-
 </body>
 </html>
 

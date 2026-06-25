@@ -1,74 +1,100 @@
 package lk.java.techmart.service;
 
-import jakarta.ejb.Asynchronous;
+import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
-import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lk.java.techmart.entity.Order;
-import lk.java.techmart.entity.Notification;
-import java.util.Date;
-import java.util.concurrent.Future;
-import jakarta.ejb.AsyncResult;
+import lk.java.techmart.entity.Product;
+import lk.java.techmart.messaging.OrderProducer;
+
+import java.util.Map;
 import java.util.logging.Logger;
 
 @Stateless
 public class OrderService {
 
-    private static final Logger LOGGER =
-            Logger.getLogger(OrderService.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(OrderService.class.getName());
 
-    @PersistenceContext(unitName = "TechMartPU")
+    @PersistenceContext
     private EntityManager em;
 
-    @Inject
+    @EJB
     private InventoryCache inventoryCache;
 
-    public Order checkout(String customerName, java.util.Map<Long, Integer> cartItems) {
+    @EJB
+    private OrderProducer orderProducer;
 
-        Double totalAmount = 0.0;
+    @EJB
+    private TechMartAnalyticsService analyticsService;
+
+    public Order checkout(String customerName, Map<Long, Integer> cartItems) {
+
+        long startTime = System.currentTimeMillis();
+
         Order order = new Order();
         order.setCustomerName(customerName);
         order.setStatus("PENDING");
 
-        for (java.util.Map.Entry<Long, Integer> item : cartItems.entrySet()) {
-            boolean success = inventoryCache.deductStock(item.getKey(), item.getValue());
-            if (!success) {
-                order.setStatus("FAILED");
-                LOGGER.warning("Order processing failed due to insufficient stock for Product ID: " + item.getKey());
-                return order;
+        double totalAmount = 0.0;
+        boolean transactionSuccess = true;
+
+        for (Map.Entry<Long, Integer> entry : cartItems.entrySet()) {
+            Long productId = entry.getKey();
+            Integer orderQty = entry.getValue();
+
+            boolean deducted = inventoryCache.deductStock(productId, orderQty);
+            if (!deducted) {
+                transactionSuccess = false;
+                LOGGER.warning("[STOCK OUT] : Insufficient stock in Cache for Product ID: " + productId);
+                break;
             }
-            totalAmount += (item.getValue() * 100.0);
         }
 
-        order.setTotalAmount(totalAmount);
-        order.setStatus("COMPLETED");
+        if (transactionSuccess) {
+            for (Map.Entry<Long, Integer> entry : cartItems.entrySet()) {
+                Long productId = entry.getKey();
+                Integer orderQty = entry.getValue();
 
-        em.persist(order);
-        em.flush();
+                Product product = em.find(Product.class, productId);
+                if (product != null) {
+                    totalAmount += product.getPrice() * orderQty;
 
-        LOGGER.info("Order processed successfully. Order ID: " + order.getId());
+                    int newStock = product.getStock() - orderQty;
+                    product.setStock(newStock);
+                    em.merge(product);
+                }
+            }
 
-        sendOrderNotification(order.getId());
+            order.setTotalAmount(totalAmount);
+            order.setStatus("COMPLETED");
+
+            em.persist(order);
+            em.flush();
+
+            try {
+                orderProducer.sendOrderMessage(order.getId(), customerName, totalAmount);
+                LOGGER.info("[JMS SUCCESS] : Order message sent to ActiveMQ Queue.");
+            } catch (Exception e) {
+                LOGGER.severe("[JMS ERROR] : Producer Call Failed: " + e.getMessage());
+            }
+
+            try {
+                analyticsService.processOrderAnalytics(order.getId());
+            } catch (Exception e) {
+                LOGGER.warning("[ASYNC WARN] : Analytics execution skipped: " + e.getMessage());
+            }
+
+        } else {
+            order.setStatus("FAILED");
+            LOGGER.severe("[ORDER FAILED] : Checkout failed due to insufficient stock for " + customerName);
+        }
+
+        long endTime = System.currentTimeMillis();
+        long executionTime = endTime - startTime;
+
+        LOGGER.info("[METRICS] : checkout() execution time for client '" + customerName + "': " + executionTime + " ms");
 
         return order;
-    }
-
-    @Asynchronous
-    public Future<String> sendOrderNotification(Long orderId) {
-        long startTime = System.currentTimeMillis();
-        try {
-            Thread.sleep(3000);
-
-            Notification notification = new Notification(orderId, "Good news! Your TechMart order #" + orderId + " has been successfully processed.");
-            em.persist(notification);
-
-            long endTime = System.currentTimeMillis();
-            LOGGER.info("Notification sent for Order #" + orderId + " (Took " + (endTime - startTime) + "ms)");
-
-            return new AsyncResult<>("Notification delivery completed successfully.");
-        } catch (InterruptedException e) {
-            return new AsyncResult<>("Notification delivery failed.");
-        }
     }
 }

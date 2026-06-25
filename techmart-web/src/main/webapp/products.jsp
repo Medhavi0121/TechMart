@@ -11,107 +11,71 @@
 <html>
 <head>
     <title>TechMart - Product List</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f8fafc;
-            padding: 40px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: auto;
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        h2 {
-            color: #1e293b;
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th {
-            background: #f1f5f9;
-            color: #475569;
-            padding: 15px;
-            text-align: left;
-            font-weight: 600;
-        }
-
-        td {
-            padding: 15px;
-            border-bottom: 1px solid #e2e8f0;
-            color: #1e293b;
-        }
-
-        tr:hover {
-            background: #f8fafc;
-        }
-
-        .btn-back {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background: #2563eb;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-
-        .btn-back:hover {
-            background: #1d4ed8;
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght=500;700&family=Inter:wght=400;500;600&family=JetBrains+Mono:wght=400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/style.css">
 </head>
 <body>
+<div class="topbar"></div>
+<div class="page">
+    <div class="page-head">
+        <h2><span class="bracket">[</span>Product List<span class="bracket">]</span></h2>
 
-<div class="container">
-    <h2>Available Products</h2>
+    </div>
 
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Price (LKR)</th>
-            <th>Stock</th>
-        </tr>
-        </thead>
-        <tbody>
-        <%
-            List<Product> products = (List<Product>) request.getAttribute("productList");
-            if (products != null) {
-                for (Product p : products) {
-        %>
-        <tr>
-            <td>#<%= p.getId() %>
-            </td>
-            <td><%= p.getName() %>
-            </td>
-            <td><%= String.format("%.2f", p.getPrice()) %>
-            </td>
-            <td><%= p.getStock() > 0 ? p.getStock() : "<span style='color:red;'>Out of Stock</span>" %>
-            </td>
-        </tr>
-        <%
+    <% if (request.getParameter("message") != null) { %>
+    <p class="flash"><%= request.getParameter("message") %></p>
+    <% } %>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody class="product-table-body">
+            <%
+                List<Product> products = (List<Product>) request.getAttribute("productList");
+                if (products != null) {
+                    for (Product p : products) {
+            %>
+            <tr>
+                <td class="id-cell">#<%= p.getId() %></td>
+                <td class="name-cell"><%= p.getName() %></td>
+                <td class="price-cell">Rs. <%= p.getPrice() %></td>
+                <td>
+                    <span class="stock-badge <%= p.getStock() <= 0 ? "stock-out" : "stock-ok" %>">
+                        <%= p.getStock() %>
+                    </span>
+                </td>
+                <td>
+                    <form action="cart" method="POST" class="cart-form">
+                        <input type="hidden" name="productId" value="<%= p.getId() %>">
+                        <input type="number" name="quantity" value="1" min="1" max="<%= p.getStock() %>" class="qty-input">
+                        <button type="submit" class="btn-add" <%= p.getStock() <= 0 ? "disabled" : "" %>>
+                            <%= p.getStock() <= 0 ? "Out of Stock" : "Add to Cart" %>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            <%
                 }
-            }
-        %>
-        </tbody>
-    </table>
+            } else {
+            %>
+            <tr>
+                <td colspan="5" class="empty-row">No products found. Please refresh via ProductServlet.</td>
+            </tr>
+            <% } %>
+            </tbody>
+        </table>
+    </div>
 
-    <a href="index.jsp" class="btn-back">Back to Home</a>
+    <a href="checkout" class="checkout-link">🛒 Go to Checkout / View Cart</a>
 </div>
-
 </body>
 </html>

@@ -1,7 +1,6 @@
 package lk.java.techmart.entity;
 
 import jakarta.persistence.*;
-
 import java.io.Serializable;
 
 @Entity
