@@ -20,17 +20,17 @@ public class CartService implements Serializable {
     @PostConstruct
     public void init() {
         cartItems = new HashMap<>();
-        LOGGER.info("CartService initialized for session...");
+        LOGGER.info("CartService successfully initialized for user session.");
     }
 
     public void addItem(Long productId, Integer quantity) {
         cartItems.put(productId, cartItems.getOrDefault(productId, 0) + quantity);
-        LOGGER.info("Item added to cart: ProductID=" + productId + ", Qty=" + quantity);
+        LOGGER.info("Product added to cart successfully. ProductID=" + productId + ", Qty=" + quantity);
     }
 
     public void removeItem(Long productId) {
         cartItems.remove(productId);
-        LOGGER.info("Item removed from cart: ProductID=" + productId);
+        LOGGER.info("Product removed from cart successfully. ProductID=" + productId);
     }
 
     public Map<Long, Integer> getCartItems() {
@@ -39,11 +39,11 @@ public class CartService implements Serializable {
 
     public void clearCart() {
         cartItems.clear();
-        LOGGER.info("Cart has been cleared.");
+        LOGGER.info("All Products removed from cart successfully.");
     }
 
     @PreDestroy
     public void destroy() {
-        LOGGER.info("CartService Bean is being destroyed.");
+        LOGGER.info("CartService lifecycle: destroy phase started.");
     }
 }

@@ -30,7 +30,7 @@ public class OrderProducer {
             TextMessage textMessage = session.createTextMessage(fullMessage);
 
             producer.send(textMessage);
-            LOGGER.info("Message successfully pushed to OrderQueue for Order #" + orderId);
+            LOGGER.info("Order message published to OrderQueue successfully. Order #" + orderId);
 
         } catch (Exception e) {
             LOGGER.severe("Message sending failed: " + e.getMessage());
@@ -40,7 +40,7 @@ public class OrderProducer {
                 try {
                     connection.close();
                 } catch (JMSException e) {
-                    LOGGER.severe("Failed to close connection: " + e.getMessage());
+                    LOGGER.severe("Message dispatch failed: " + e.getMessage());
                 }
             }
         }

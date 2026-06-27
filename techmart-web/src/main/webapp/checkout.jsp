@@ -11,36 +11,130 @@
 <html>
 <head>
     <title>TechMart - Checkout</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap"
           rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/style.css">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+            color: #ffffff;
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .page-checkout {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th {
+            color: #94a3b8;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            padding: 20px;
+            text-align: left;
+        }
+
+        td {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .btn-remove {
+            background: rgba(225, 29, 72, 0.1);
+            color: #fb7185;
+            border: 1px solid #e11d48;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-remove:hover {
+            background: #e11d48;
+            color: white;
+        }
+
+        .customer-block {
+            margin-top: 30px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 30px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            margin-top: 10px;
+        }
+
+        .btn-place {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            width: 100%;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-<div class="topbar"></div>
+
 <div class="page page-checkout">
-    <h2><span class="bracket">[</span>Your Cart &amp; Checkout<span class="bracket">]</span></h2>
+    <h2> Your Cart &amp; Checkout </h2>
 
     <%
         Map<Product, Integer> items = (Map<Product, Integer>) request.getAttribute("cartProducts");
 
         if (items == null || items.isEmpty()) {
     %>
-    <div class="empty-state">
+    <div class="glass-container" style="text-align: center;">
         <p>Your cart is empty.</p>
-        <a href="products">Go back to products &rarr;</a>
+        <a href="products" style="color: #6366f1;">Go back to products &rarr;</a>
     </div>
     <%
     } else {
     %>
-    <div class="table-wrap">
+    <div class="glass-container">
         <table>
             <thead>
             <tr>
                 <th>Product Name</th>
                 <th>Price</th>
-                <th>Quantity</th>
-                <th>Total Price</th>
+                <th>Qty</th>
+                <th>Total</th>
                 <th>Action</th>
             </tr>
             </thead>
@@ -54,13 +148,13 @@
                     grandTotal += itemTotal;
             %>
             <tr>
-                <td class="name-cell"><%= product.getName() %>
+                <td><%= product.getName() %>
                 </td>
-                <td class="num-cell">Rs. <%= product.getPrice() %>
+                <td>Rs. <%= product.getPrice() %>
                 </td>
-                <td class="num-cell"><%= quantity %>
+                <td><%= quantity %>
                 </td>
-                <td class="num-cell">Rs. <%= itemTotal %>
+                <td>Rs. <%= itemTotal %>
                 </td>
                 <td>
                     <form action="${pageContext.request.contextPath}/remove-from-cart" method="POST">
@@ -69,14 +163,11 @@
                     </form>
                 </td>
             </tr>
-            <%
-                }
-            %>
-            <tr class="grand-row">
-                <td colspan="3" class="grand-label">Grand Total</td>
-                <td class="num-cell">Rs. <%= grandTotal %>
+            <% } %>
+            <tr style="background: rgba(255,255,255,0.05); font-weight: bold;">
+                <td colspan="3" style="text-align: right;">Grand Total</td>
+                <td colspan="2">Rs. <%= grandTotal %>
                 </td>
-                <td></td>
             </tr>
             </tbody>
         </table>
@@ -85,18 +176,15 @@
     <div class="customer-block">
         <h3>Customer Details</h3>
         <form action="checkout" method="POST">
-            <div class="field-group">
-                <label for="customerName">Your Name</label>
-                <input type="text" id="customerName" name="customerName" required placeholder="Enter your name">
-            </div>
+            <label>Your Name</label>
+            <input type="text" name="customerName" required placeholder="Enter your name">
             <button type="submit" class="btn-place">Place Order</button>
         </form>
     </div>
-    <%
-        }
-    %>
+    <% } %>
 
-    <a href="products" class="continue-link">&larr; Continue Shopping</a>
+    <a href="products" style="display: block; margin-top: 20px; color: #94a3b8; text-decoration: none;">&larr; Continue
+        Shopping</a>
 </div>
 </body>
 </html>

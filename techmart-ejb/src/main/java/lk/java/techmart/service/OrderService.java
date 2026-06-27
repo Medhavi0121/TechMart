@@ -46,7 +46,7 @@ public class OrderService {
             boolean deducted = inventoryCache.deductStock(productId, orderQty);
             if (!deducted) {
                 transactionSuccess = false;
-                LOGGER.warning("[STOCK OUT] : Insufficient stock in Cache for Product ID: " + productId);
+                LOGGER.warning("[OUT OF STOCK] :Insufficient stock available in cache for product ID: " + productId);
                 break;
             }
         }
@@ -74,26 +74,26 @@ public class OrderService {
 
             try {
                 orderProducer.sendOrderMessage(order.getId(), customerName, totalAmount);
-                LOGGER.info("[JMS SUCCESS] : Order message sent to ActiveMQ Queue.");
+                LOGGER.info("[JMS OPERATION SUCCESS] : Order message published to ActiveMQ queue successfully.");
             } catch (Exception e) {
-                LOGGER.severe("[JMS ERROR] : Producer Call Failed: " + e.getMessage());
+                LOGGER.severe("[JMS OPERATION ERROR] : Failed to execute producer call: " + e.getMessage());
             }
 
             try {
                 analyticsService.processOrderAnalytics(order.getId());
             } catch (Exception e) {
-                LOGGER.warning("[ASYNC WARN] : Analytics execution skipped: " + e.getMessage());
+                LOGGER.warning("[ASYNC OPERATION WARNING] : Analytics processing skipped due to condition: " + e.getMessage());
             }
 
         } else {
             order.setStatus("FAILED");
-            LOGGER.severe("[ORDER FAILED] : Checkout failed due to insufficient stock for " + customerName);
+            LOGGER.severe("[ORDER TRANSACTION FAILED] : Checkout aborted: insufficient stock available for product " + customerName);
         }
 
         long endTime = System.currentTimeMillis();
         long executionTime = endTime - startTime;
 
-        LOGGER.info("[METRICS] : checkout() execution time for client '" + customerName + "': " + executionTime + " ms");
+        LOGGER.info("[PERFORMANCE METRICS] : Client checkout() completed successfully in: '" + customerName + "': " + executionTime + " ms");
 
         return order;
     }

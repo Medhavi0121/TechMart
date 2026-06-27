@@ -18,11 +18,11 @@ public class TechMartAnalyticsService {
             Thread.sleep(1500);
 
             long duration = System.currentTimeMillis() - start;
-            LOGGER.info("[ASYNC METRIC] : Analytics compiled for Order ID: " + orderId + " (Took " + duration + "ms)");
+            LOGGER.info("[ASYNC PERFORMANCE METRIC] : Order analytics processing completed for Order ID: " + orderId + " (Took " + duration + "ms)");
 
             return new AsyncResult<>("ANALYTICS_SUCCESS");
         } catch (InterruptedException e) {
-            LOGGER.severe("[ASYNC ERROR] : Analytics execution failed: " + e.getMessage());
+            LOGGER.severe("[ASYNC PROCESS ERROR] : Analytics execution encountered an error: " + e.getMessage());
             return new AsyncResult<>("ANALYTICS_FAILED");
         }
     }

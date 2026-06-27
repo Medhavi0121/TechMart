@@ -7,6 +7,7 @@ import jakarta.annotation.PreDestroy;
 import jakarta.jms.Message;
 import jakarta.jms.MessageListener;
 import jakarta.jms.TextMessage;
+
 import java.util.logging.Logger;
 
 @MessageDriven(name = "NotificationMDB", activationConfig = {
@@ -21,9 +22,9 @@ public class NotificationMDB implements MessageListener {
 
     @PostConstruct
     public void init() {
-        
-        System.out.println("Instance Created & Ready to Consume!");
-        LOGGER.info("MDB Instance Created & Ready to Consume Messages!");
+
+        System.out.println("Instance created successfully and ready for consumption.");
+        LOGGER.info("MDB instance initialized successfully and ready to process messages.");
     }
 
     @Override
@@ -33,19 +34,21 @@ public class NotificationMDB implements MessageListener {
                 TextMessage textMessage = (TextMessage) message;
                 String payload = textMessage.getText();
 
-                System.out.println("\n==========================================================");
-                System.out.println("[NOTIFICATION SERVICE] : ActiveMQ Asynchronous Notification");
-                System.out.println("[Received Payload] : " + payload);
-                System.out.println("==========================================================\n");
+                System.out.println("\n==================== NOTIFICATION LOG ====================");
+                System.out.println("[NOTIFICATION SERVICE] : ActiveMQ Async Notification Handler");
+                System.out.println("[EVENT] : Message received from queue successfully");
+                System.out.println("[PAYLOAD] : " + payload);
+                System.out.println("[STATUS] : Notification processing started");
+                System.out.println("===================== NOTIFICATION LOG ====================\n");
             }
         } catch (Exception e) {
-            LOGGER.severe("CRITICAL ERROR in MDB processing: " + e.getMessage());
+            LOGGER.severe("Severe error encountered while processing MDB message: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     @PreDestroy
     public void destroy() {
-        LOGGER.info("Instance is being Destroyed ");
+        LOGGER.info("Destroying instance and releasing resources.");
     }
 }

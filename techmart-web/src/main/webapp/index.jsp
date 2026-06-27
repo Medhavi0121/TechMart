@@ -5,52 +5,85 @@
   Time: 8:22 PM
   To change this template use File | Settings | File Templates.
 --%>
+
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
     <title>TechMart | Welcome</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap"
+          rel="stylesheet">
     <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --bg-color: #0f172a;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background: #f8fafc;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            color: #ffffff;
         }
-        .hero-container {
-            background: #ffffff;
-            padding: 3rem;
-            border-radius: 24px;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+
+        .hero-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            padding: 4rem;
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             text-align: center;
             max-width: 500px;
             width: 90%;
+            transition: transform 0.4s ease;
         }
-        h1 { color: #0f172a; margin-bottom: 1rem; }
-        p { color: #64748b; margin-bottom: 2rem; line-height: 1.6; }
-        .action-btn {
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            color: #cbd5e1;
+            margin-bottom: 2.5rem;
+            line-height: 1.7;
+            font-size: 1.1rem;
+        }
+
+        .btn-view {
             display: inline-block;
-            padding: 12px 30px;
-            background: #2563eb;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: #ffffff;
             text-decoration: none;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: transform 0.2s;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
         }
-        .action-btn:hover { transform: scale(1.05); background: #1d4ed8; }
+
+        .btn-view:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(168, 85, 247, 0.4);
+        }
     </style>
 </head>
 <body>
 
-<div class="hero-container">
-    <h1>Welcome to TechMart</h1>
-    <p>Your one-stop destination for the latest technology and gadgets. Explore our premium product catalog with ease.</p>
+<div class="hero-card">
+    <h1>TechMart</h1>
+    <p>Experience the future of technology with our curated collection of premium gadgets. Quality meets innovation.</p>
 
-    <a href="products" class="action-btn">View Products</a>
+    <a href="products" class="btn-view">Explore Collection</a>
 </div>
 
 </body>

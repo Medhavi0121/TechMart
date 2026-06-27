@@ -22,7 +22,7 @@ public class InventoryCache {
 
     @PostConstruct
     public void init() {
-        LOGGER.info("[LIFECYCLE] : InventoryCache EJB Initialized at Startup.");
+        LOGGER.info("[LIFECYCLE EVENT]:InventoryCache EJB successfully initialized during application startup.");
     }
 
     @Lock(LockType.READ)
@@ -37,7 +37,7 @@ public class InventoryCache {
         stockCache.put(productId, quantity);
 
         long duration = System.nanoTime() - startTime;
-        LOGGER.info("[CACHE METRIC] Stock updated for Product " + productId + " to " + quantity + " (Took " + duration + " ns)"); //
+        LOGGER.info("[CACHE STATISTICS]:Inventory cache updated for product " + productId + " to " + quantity + " (Took " + duration + " ns)"); //
     }
 
     @Lock(LockType.WRITE)
@@ -49,7 +49,7 @@ public class InventoryCache {
             stockCache.put(productId, currentStock - quantity);
 
             long endTime = System.currentTimeMillis();
-            LOGGER.info("[PERFORMANCE METRIC] : deductStock executed in " + (endTime - startTime) + " ms");
+            LOGGER.info("[SYSTEM PERFORMANCE METRIC]:deductStock method execution time " + (endTime - startTime) + " ms");
             return true;
         }
 

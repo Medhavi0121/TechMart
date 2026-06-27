@@ -25,7 +25,7 @@ public class CartServlet extends HttpServlet {
 
             cartService.addItem(productId, quantity);
 
-            response.sendRedirect(request.getContextPath() + "/products?message=Product successfully added to cart!");
+            response.sendRedirect(request.getContextPath() + "/products?message=Product has been added to your cart successfully.");
 
         } catch (Exception e) {
             throw new ServletException("Error adding item to cart", e);
